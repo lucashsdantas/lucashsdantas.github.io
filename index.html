@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Leitor de Código de Barras</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif; background: #f5f5f5;
+      margin:0; padding:20px; display:flex; justify-content:center;
+    }
+    .container {
+      background:#fff; padding:20px; border-radius:12px;
+      box-shadow:0 0 12px rgba(0,0,0,0.1); width:100%; max-width:500px;
+    }
+    h2 { text-align:center; color:#333; }
+    input { width:100%; padding:12px; font-size:16px;
+      margin-bottom:15px; border:1px solid #ccc; border-radius:8px; }
+    .buttons { display:flex; justify-content:space-between; }
+    button {
+      width:48%; padding:12px; font-size:16px;
+      background:#007bff; color:#fff; border:none; border-radius:8px;
+      cursor:pointer;
+    }
+    #result { margin-top:20px; text-align:center; font-size:16px; color:#444; }
+    #cameraBox {
+      display:none; margin-top:20px; border:2px solid #007bff;
+      border-radius:12px; overflow:hidden;
+    }
+    #cameraBox video { width:100%; height:auto; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Consulta Código de Barras</h2>
+    <input type="text" id="codigoManual" placeholder="Digite ou escaneie o código" />
+    <div class="buttons">
+      <button onclick="consultar()">Consultar</button>
+      <button onclick="iniciarCamera()">📷 Ler com Câmera</button>
+    </div>
+    <div id="cameraBox"><div id="camera-preview"></div></div>
+    <div id="result"></div>
+  </div>
+
+  <script src="https://unpkg.com/@ericblade/quagga2@1.2.6/dist/quagga.min.js"></script>
+  <script>
+    function consultar(){
+      const codigo=document.getElementById("codigoManual").value.trim();
+      if(!codigo) return document.getElementById("result").innerHTML="Digite ou leia um código.";
+      // Aqui insira a lógica que faz fetch no Apps Script ou outro backend
+      alert("Implementar consulta via fetch");
+    }
+
+    function iniciarCamera(){
+      document.getElementById("cameraBox").style.display="block";
+      Quagga.init({
+        inputStream: {
+          name: "Live", type: "LiveStream",
+          target: document.getElementById("camera-preview"),
+          constraints:{ facingMode:"environment" }
+        },
+        decoder: { readers:["code_128_reader","ean_reader","ean_8_reader"] },
+        locate:true
+      }, e=>{
+        if(e){ return alert("Erro ao ativar câmera: "+e.message); }
+        Quagga.start();
+      });
+      Quagga.onDetected(r=>{
+        Quagga.stop();
+        document.getElementById("cameraBox").style.display="none";
+        document.getElementById("codigoManual").value=r.codeResult.code;
+        consultar();
+      });
+    }
+  </script>
+</body>
+</html>
